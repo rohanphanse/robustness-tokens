@@ -1,0 +1,14 @@
+batch_size: 32
+dataset: imagenet
+num_workers: 8
+results_dir: results/robustness/features/dinov3_vitl16
+seed: 0
+surrogate:
+  name: dinov3_vitl16
+  enbable_robust: false
+  n_rtokens: 0
+victim:
+  name: dinov3_vitl16
+  enbable_robust: true
+  n_rtokens: 10
+victim_state_dict: results/dinov3_vitl16/last.ckpt

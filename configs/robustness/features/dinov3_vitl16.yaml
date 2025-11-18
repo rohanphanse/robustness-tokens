@@ -1,0 +1,13 @@
+batch_size: 32
+dataset: imagenet
+num_workers: 8
+results_dir: results/robustness/features/dinov3_vitl16_base
+seed: 0
+surrogate:
+  name: dinov3_vitl16
+  enbable_robust: false
+  n_rtokens: 0
+victim:
+  name: dinov3_vitl16
+  enbable_robust: false
+  n_rtokens: 0
