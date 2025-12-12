@@ -12,6 +12,8 @@ def convert_checkpoint(sd):
     else:
         sd["register_tokens"] = torch.cat([sd["register_tokens"], sd["rtokens"]], dim=1)
 
+    sd["storage_tokens"] = sd["register_tokens"] # For DINOv3
+
     # Remove "rtokens"
     del sd["rtokens"]
 

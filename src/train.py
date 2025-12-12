@@ -15,6 +15,14 @@ from data.utils import get_loaders_fn
 from models.utils import get_model
 from utils import read_config
 
+def build_warmup_scheduler(optimizer, warmup_steps):
+    if warmup_steps is None or warmup_steps <= 0:
+        return None
+    def lr_lambda(step):
+        if step < warmup_steps:
+            return float(step + 1) / float(max(1, warmup_steps))
+        return 1.0
+    return torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
 def train_rtokens(
     model,
@@ -25,6 +33,7 @@ def train_rtokens(
     max_steps,
     checkpoint_freq,
     store_path,
+    warmup_scheduler=None,
 ):
     """Training loop to optimize robustness tokens."""
     # Preparing model, optimizer and data loader
@@ -57,6 +66,8 @@ def train_rtokens(
                 optim.zero_grad()
                 accelerator.backward(loss)
                 optim.step()
+                if warmup_scheduler is not None:
+                    warmup_scheduler.step()
 
                 wandb.log(
                     {
@@ -115,6 +126,8 @@ def main(args):
         lr=args["train"]["lr"],
         maximize=(args["train"]["mode"] == "max"),
     )
+    warmup_steps = args["train"].get("warmup_steps", 0)
+    warmup_scheduler = build_warmup_scheduler(optim, warmup_steps)
 
     # Training loop
     accelerator = Accelerator()
@@ -127,6 +140,7 @@ def main(args):
         max_steps,
         checkpoint_freq,
         store_path,
+        warmup_scheduler=warmup_scheduler,
     )
 
     # Finishing wandb
